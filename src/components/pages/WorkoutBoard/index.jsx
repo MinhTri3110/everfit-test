@@ -28,6 +28,7 @@ const WorkoutBoard = () => {
             const newColumn = Object.assign({}, column);
             newColumn.workout = applyDrag(newColumn.workout, dropResult);
             comlumnList.splice(columnIndex, 1, newColumn);
+            console.log(dropResult);
 
             setBoard(comlumnList);
         }
@@ -37,9 +38,9 @@ const WorkoutBoard = () => {
         if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
             const comlumnList = [...board];
             const column = comlumnList.filter(p => p.id === columnId)[0];
-            const columnIndex = column.indexOf(column)
-            const card = column.filter(p => p.id === cardId)[0];
-            const cardIndex = column.indexOf(card);
+            const columnIndex = comlumnList.indexOf(column)
+            const card = column?.workout?.filter(p => p.id === cardId)[0];
+            const cardIndex = column?.workout?.indexOf(card);
 
             const newCard = Object.assign({}, card);
             newCard.exercise = applyDrag(newCard.exercise, dropResult);
@@ -50,16 +51,12 @@ const WorkoutBoard = () => {
     }
 
     const getCardPayload = (columnId, index) => {
-        return board.filter(p => p.id === columnId)[0].workout[
-          index
-        ];
+        return board.filter(p => p.id === columnId)?.[0]?.workout?.[index];
     }
 
     const getExercisePayload = (columnId, cardId, index) => {
-        const column = board.filter(p => p.id === columnId)[0].workout;
-        return column.filter(p => p.id === cardId)[0].exercise[
-            index
-        ];
+        const column = board.filter(p => p.id === columnId)?.[0]?.workout || [];
+        return column.filter(p => p.id === cardId)?.[0]?.exercise?.[index];
     }
 
     return (
@@ -106,7 +103,7 @@ const WorkoutBoard = () => {
                                                             groupName="sub-col"
                                                             orientation="vertical"
                                                             className="subcard-container"
-                                                            onDrop={e => onCardDrop(item.id, card.id, e)}
+                                                            onDrop={e => onSubCardDrop(item.id, card.id, e)}
                                                             dragClass="subcard-ghost"
                                                             dropClass="subcard-ghost-drop"
                                                             getChildPayload={index => getExercisePayload(item.id, card.id, index)}
