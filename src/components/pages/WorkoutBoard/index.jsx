@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Container, Draggable } from "react-smooth-dnd";
+import { v4 as uuidv4 } from "uuid";
 
 import Workout from "../../common/Workout";
 import Exercise from "../../common/Exercise";
@@ -7,129 +8,122 @@ import Exercise from "../../common/Exercise";
 import { dataWorkout } from "../../../mockData/data";
 import './style.css';
 import { applyDrag } from "../../../utils/helper";
+import moment from "moment";
 
 const WorkoutBoard = () => {
+    const [board, setBoard] = useState(dataWorkout);
 
-    const [board, setBoard] = useState([
-        ...dataWorkout
-    ]);
+    const curentDate = moment(new Date()).format('DD/MM/YYYY');
+    
+    const onWorkoutDrop = (indexDate, dropResult) =>  {
+        if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
+            const newColumnList = [...board];
+            newColumnList[indexDate].workouts = applyDrag(newColumnList[indexDate].workouts, dropResult);
+            setBoard(newColumnList);
+        }
+    }
 
-    const onColumnDrop = (dropResult) => {
-        const columnList = applyDrag(board, dropResult);
-        setBoard(columnList);
+    const onExcersiceDrop = (indexDate, indexWorkout, dropResult) =>  {
+        if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
+            const newColumnList = [...board];
+            newColumnList[indexDate].workouts[indexWorkout].exercises = applyDrag(
+                newColumnList[indexDate].workouts[indexWorkout].exercises,
+                dropResult
+            );
+            setBoard(newColumnList);
+        }
+    }
+
+    const getWorkoutPayload = (indexDate, index) => {
+        return board.filter((_, i) => i === indexDate)?.[0]?.workouts?.[index];
+    }
+
+    const getExercisePayload = (indexDate, indexWorkout, index) => {
+        return board?.[indexDate]?.workouts?.filter(
+            (_, i) => i === indexWorkout
+          )[0]?.exercises[index];
+    }
+
+    const handleAddExercise = (dateId, workoutId) => {
+        const boardData = board?.map((itemDate) => {
+            if (dateId === itemDate?.id) {
+              const workoutData = itemDate?.workouts?.map((itemWorkout) => {
+                if (workoutId === itemWorkout.id) {
+                  const listExercise = itemWorkout?.exercises || [];
+                  listExercise?.push({
+                    id: uuidv4(),
+                    name: "New Exercise",
+                    set: "1x",
+                    infomation: "30 lb x 10",
+                  });
+                  return {
+                    ...itemWorkout,
+                    exercises: listExercise,
+                  };
+                } else {
+                  return itemWorkout;
+                }
+              });
+              return { ...itemDate, workouts: workoutData };
+            } else {
+              return itemDate;
+            }
+        });
+        setBoard(boardData);
     }
     
-    const onCardDrop = (columnId, dropResult) =>  {
-        if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
-            const comlumnList = [...board];
-            const column = comlumnList.filter(p => p.id === columnId)[0];
-            const columnIndex = comlumnList.indexOf(column);
-
-            const newColumn = Object.assign({}, column);
-            newColumn.workout = applyDrag(newColumn.workout, dropResult);
-            comlumnList.splice(columnIndex, 1, newColumn);
-            console.log(dropResult);
-
-            setBoard(comlumnList);
-        }
-    }
-
-    const onSubCardDrop = (columnId, cardId, dropResult) =>  {
-        if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
-            const comlumnList = [...board];
-            const column = comlumnList.filter(p => p.id === columnId)[0];
-            const columnIndex = comlumnList.indexOf(column)
-            const card = column?.workout?.filter(p => p.id === cardId)[0];
-            const cardIndex = column?.workout?.indexOf(card);
-
-            const newCard = Object.assign({}, card);
-            newCard.exercise = applyDrag(newCard.exercise, dropResult);
-            comlumnList[columnIndex]?.workout.splice(cardIndex, 1, newCard);
-
-            setBoard(comlumnList);
-        }
-    }
-
-    const getCardPayload = (columnId, index) => {
-        return board.filter(p => p.id === columnId)?.[0]?.workout?.[index];
-    }
-
-    const getExercisePayload = (columnId, cardId, index) => {
-        const column = board.filter(p => p.id === columnId)?.[0]?.workout || [];
-        return column.filter(p => p.id === cardId)?.[0]?.exercise?.[index];
-    }
-
     return (
-        <div className="workout-board-wrapper">
-            <div className="workout-board-list">
-                <Container
-                    orientation="horizontal"
-                    onDrop={onColumnDrop}
-                    dragHandleSelector=".card-column-header"
-                    dropPlaceholder={{
-                        animationDuration: 150,
-                        showOnTop: true,
-                        className: 'cards-drop-preview'
-                    }}
-                >
-                    {board?.map(item => (
-                        item.id && 
-                        <Draggable key={item.id}>
-                            <div className="card-column">
-                                <div className="card-column-header">{item?.date}</div>
-                                <Container
-                                    groupName="col"
-                                    orientation="vertical"
-                                    className="card-container"
-                                    onDrop={e => onCardDrop(item.id, e)}
-                                    dragClass="card-ghost"
-                                    dropClass="card-ghost-drop"
-                                    getChildPayload={index => getCardPayload(item.id, index)}
-                                    dropPlaceholder={{                      
-                                        animationDuration: 150,
-                                        showOnTop: true,
-                                        className: 'drop-preview' 
-                                    }}
-                                    dropPlaceholderAnimationDuration={200}
-                                >
-                                    <div className="card-column-title">{item?.day}</div>
-                                    {item?.workout?.map(card => (
-                                        card?.id &&
-                                        <Draggable key={card?.id}>
-                                            <div className="card">
-                                                <Workout data={card}>
-                                                    <div className="subcard-column">
-                                                        <Container
-                                                            groupName="sub-col"
-                                                            orientation="vertical"
-                                                            className="subcard-container"
-                                                            onDrop={e => onSubCardDrop(item.id, card.id, e)}
-                                                            dragClass="subcard-ghost"
-                                                            dropClass="subcard-ghost-drop"
-                                                            getChildPayload={index => getExercisePayload(item.id, card.id, index)}
-                                                            dropPlaceholder={{                      
-                                                                animationDuration: 150,
-                                                                showOnTop: true,
-                                                                className: 'drop-preview' 
-                                                            }}
-                                                            dropPlaceholderAnimationDuration={200}
-                                                        >
-                                                            {card?.exercise?.map(exercise => (
-                                                                <Draggable key={exercise?.id}>
-                                                                    <div className="exercise">
-                                                                        {exercise?.id && <Exercise data={exercise} />}
-                                                                    </div>
-                                                                </Draggable>
-                                                            ))}
-                                                        </Container>
-                                                    </div>
-                                                </Workout>
-                                            </div>
-                                        </Draggable>
-                                    ))}
-                                </Container>
+        <div className="workouts-board-wrapper">
+            <div className="workouts-board-list">
+                <Container>
+                    {board?.map((itemDate, indexDate) => (
+                        itemDate.id && 
+                        <div className="column-wrapper" key={indexDate}>
+                            <div className={`column ${itemDate?.fullDate === curentDate && "active"}`}>
+                                <div className="column-header">{itemDate?.date}</div>
+                                <div className="column-content">
+                                    <div className="column-title">{itemDate?.day}</div>
+                                    <Container
+                                        groupName="workouts"
+                                        onDrop={(e) => onWorkoutDrop(indexDate, e)}
+                                        getChildPayload={(e) => getWorkoutPayload(indexDate, e)}
+                                        dropPlaceholder={{                      
+                                            animationDuration: 150,
+                                        }}
+                                        dropPlaceholderAnimationDuration={200}
+                                    >
+                                        {itemDate?.workouts?.map((itemWorkout, indexWorkout) => (
+                                            itemWorkout?.id &&
+                                            <Draggable key={indexWorkout}>
+                                                <div className="card">
+                                                    <Workout data={itemWorkout} addExercise={() => handleAddExercise(itemDate?.id, itemWorkout?.id)}>
+                                                        <div className="card-workouts">
+                                                            <Container
+                                                                groupName="exercises"
+                                                                onDrop={(e) => onExcersiceDrop(indexDate, indexWorkout, e)}
+                                                                getChildPayload={(e) => getExercisePayload(indexDate, indexWorkout, e)}
+                                                                dropPlaceholder={{                      
+                                                                    animationDuration: 150,
+                                                                }}
+                                                                dropPlaceholderAnimationDuration={200}
+                                                            >
+                                                                {itemWorkout?.exercises?.map((itemExercise, indexExercise) => (
+                                                                    <Draggable key={indexExercise}>
+                                                                        <div className="exercises">
+                                                                            {itemExercise?.id && <Exercise data={itemExercise} />}
+                                                                        </div>
+                                                                    </Draggable>
+                                                                ))}
+                                                            </Container>
+                                                        </div>
+                                                    </Workout>
+                                                </div>
+                                            </Draggable>
+                                        ))}
+                                    </Container>
+                                </div>
                             </div>
-                        </Draggable>
+                        </div>
                     ))}
                 </Container>
             </div>

@@ -1,52 +1,63 @@
+import moment from "moment/moment";
+import { v4 as uuidv4 } from "uuid";
+
+const dates = [];
+for (let i = 1; i <= 7; i++) {
+    dates.push(moment().day(i));
+}
+
 export const dataWorkout = [
     {
-        id: 1,
-        date: 'Mon',
-        day: '05',
-        workout: [],
+        id: uuidv4(),
+        date: dates[0].format('ddd'),
+        day: dates[0].format('DD'),
+        fullDate: dates[0].format('DD/MM/YYYY'),
+        workouts: [],
     },
     {
-        id: 2,
-        date: 'Tue',
-        day: '06',
-        workout: [
+        id: uuidv4(),
+        date: dates[1].format('ddd'),
+        day: dates[1].format('DD'),
+        fullDate: dates[1].format('DD/MM/YYYY'),
+        workouts: [
             {
-                id: 'wk_01',
-                name: 'Chest day - with arm...',
-                exercise: [
+                id: uuidv4(),
+                name: 'Chest Day - with Arm exercises',
+                exercises: [
                     {
                         id: 'ex_01',
-                        name: 'Bench Press Med...',
+                        name: 'Bench Press Medium Grip',
                         set: '3x',
-                        infomation: '50 lb x 5, 60 lb x 5, 70 l...',
+                        infomation: '50 lb x 5, 60 lb x 5, 70 lb x 5',
                     }
                 ]
             }
         ]
     },
     {
-        id: 3,
-        date: 'Web',
-        day: '07',
-        workout: [
+        id: uuidv4(),
+        date: dates[2].format('ddd'),
+        day: dates[2].format('DD'),
+        fullDate: dates[2].format('DD/MM/YYYY'),
+        workouts: [
             {
-                id: 'wk_02',
+                id: uuidv4(),
                 name: 'Leg Day',
-                exercise: [
+                exercises: [
                     {
-                        id: 'ex_03',
+                        id: uuidv4(),
                         name: 'Exercise C',
                         set: '1x',
                         infomation: '30 lb x 6',
                     },
                     {
-                        id: 'ex_04',
+                        id: uuidv4(),
                         name: 'Exercise D',
                         set: '1x',
                         infomation: '40 lb x 5',
                     },
                     {
-                        id: 'ex_05',
+                        id: uuidv4(),
                         name: 'Exercise E',
                         set: '1x',
                         infomation: '50 lb x 5',
@@ -54,11 +65,11 @@ export const dataWorkout = [
                 ]
             },
             {
-                id: 'wk_03',
+                id: uuidv4(),
                 name: 'Arm day',
-                exercise: [
+                exercises: [
                     {
-                        id: 'ex_06',
+                        id: uuidv4(),
                         name: 'Exercise F',
                         set: '1x',
                         infomation: '60 lb x 6',
@@ -68,27 +79,31 @@ export const dataWorkout = [
         ]
     },
     {
-        id: 4,
-        date: 'Thu',
-        day: '08',
-        workout: []
+        id: uuidv4(),
+        date: dates[3].format('ddd'),
+        day: dates[3].format('DD'),
+        fullDate: dates[3].format('DD/MM/YYYY'),
+        workouts: []
     },
     {
-        id: 5,
-        date: 'Fri',
-        day: '09',
-        workout: []
+        id: uuidv4(),
+        date: dates[4].format('ddd'),
+        day: dates[4].format('DD'),
+        fullDate: dates[4].format('DD/MM/YYYY'),
+        workouts: []
     },
     {
-        id: 6,
-        date: 'Sat',
-        day: '10',
-        workout: []
+        id: uuidv4(),
+        date: dates[5].format('ddd'),
+        day: dates[5].format('DD'),
+        fullDate: dates[5].format('DD/MM/YYYY'),
+        workouts: []
     },
     {
-        id: 7,
-        date: 'Sun',
-        day: '11',
-        workout: []
+        id: uuidv4(),
+        date: dates[6].format('ddd'),
+        day: dates[6].format('DD'),
+        fullDate: dates[6].format('DD/MM/YYYY'),
+        workouts: []
     },
 ];
